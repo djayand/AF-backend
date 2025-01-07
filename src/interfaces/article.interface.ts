@@ -1,7 +1,7 @@
 import { Document } from 'mongoose';
 import { Comment } from '../interfaces/comment.interface';
 
-export interface Article extends Document {
+export class Article extends Document {
   id: string;
   title: string;
   description: string;
