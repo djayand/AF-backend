@@ -46,6 +46,7 @@ export class ArticleController {
   }
 
   @Patch(':id')
+  @ApiBody({ type: Article })
   async update(@Param('id') id: string, @Body() updateData: Partial<Article>): Promise<Article> {
     try {
       this.logger.log(`PATCH /articles/${id}`);
