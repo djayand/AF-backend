@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Patch, Delete, Param, Body, HttpException, HttpStatus } from '@nestjs/common';
-import { ApiBody } from '@nestjs/swagger'
+import { ApiBody } from '@nestjs/swagger';
 import { ArticleService } from './article.service';
 import { Article } from '../interfaces/article.interface';
 
@@ -10,7 +10,13 @@ export class ArticleController {
   @Post()
   @ApiBody({ type: Article })
   async createArticle(@Body() article: Article): Promise<Article> {
-    return this.articleService.create(article);
+    try {
+      console.log('POST /articles');
+      return await this.articleService.create(article);
+    } catch (error) {
+      console.error('Error creating article:', error);
+      throw new HttpException('Failed to create article', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Get(':id')
@@ -38,7 +44,7 @@ export class ArticleController {
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateData: Partial<Article>): Promise<Article> {
     try {
-      console.log(`PATCH /articles/${id}`, updateData);
+      console.log(`PATCH /articles/${id}`);
       return await this.articleService.update(id, updateData);
     } catch (error) {
       console.error(`Error updating article with id ${id}:`, error);
