@@ -1,20 +1,55 @@
-import { Schema } from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
 
-export const ArticleSchema = new Schema({
-  title: { type: String, required: true },
-  description: { type: String, required: true },
-  content: { type: String, required: true },
-  coverImage: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-  creator: { type: String, required: true },
-  isImportant: { type: Boolean, default: false },
-  isDraft: { type: Boolean, default: true },
-  isFeatured: { type: Boolean, default: false },
-  views: { type: Number, default: 0 },
-  likes: { type: Number, default: 0 },
-  coms: { type: Number, default: 0 },
-  comments: { type: Array, default: [] },
-  keywords: { type: [String], default: [] },
-  readingTime: { type: Number, required: true },
-});
+@Schema({ collection: 'articles' })
+export class Article extends Document {
+  @Prop({ required: true })
+  title: string;
+
+  @Prop({ required: true })
+  description: string;
+
+  @Prop({ required: true })
+  content: string;
+
+  @Prop({ required: true })
+  coverImage: string;
+
+  @Prop({ default: Date.now })
+  createdAt: Date;
+
+  @Prop({ default: Date.now })
+  updatedAt: Date;
+
+  @Prop({ required: true })
+  creator: string;
+
+  @Prop({ default: false })
+  isImportant: boolean;
+
+  @Prop({ default: true })
+  isDraft: boolean;
+
+  @Prop({ default: false })
+  isFeatured: boolean;
+
+  @Prop({ default: 0 })
+  views: number;
+
+  @Prop({ default: 0 })
+  likes: number;
+
+  @Prop({ default: 0 })
+  coms: number;
+
+  @Prop({ default: [] })
+  comments: any[];
+
+  @Prop({ default: [] })
+  keywords: string[];
+
+  @Prop({ required: true })
+  readingTime: number;
+}
+
+export const ArticleSchema = SchemaFactory.createForClass(Article);
