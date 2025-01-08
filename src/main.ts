@@ -6,6 +6,13 @@ async function bootstrap() {
   // Launch app
   const app = await NestFactory.create(AppModule);
 
+  // Enable CORS with fully open settings
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: '*',
+  });
+
   // Swagger UI
   const config = new DocumentBuilder()
     .setTitle('Atleti Francia API')
