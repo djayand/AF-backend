@@ -1,5 +1,5 @@
 import { Document } from 'mongoose';
-import { Comment } from '../interfaces/comment.interface';
+import { Comment } from './comment.interface';
 
 export class Article extends Document {
   id: string;
