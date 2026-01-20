@@ -36,6 +36,9 @@ $ npm run test:cov
 
 ## Versions
 
+**v0.0.3**
+- Ajout du CRUD sur l'effectif
+
 **v0.0.2**  
 - Ajout du CRUD sur les articles
 - Création de la connexion avec MongoDB
