@@ -5,7 +5,7 @@ import { Article } from '../interfaces/article.interface';
 
 @Injectable()
 export class ArticleService {
-  constructor(@InjectModel('Article') private readonly articleModel: Model<Article>) {}
+  constructor(@InjectModel('Article') private readonly articleModel: Model<Article>) { }
 
   /**
    * Creates a new article in the database.
@@ -82,6 +82,57 @@ export class ArticleService {
       return deletedArticle;
     } catch (error) {
       throw new HttpException(`Failed to delete article with id ${id}`, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  // ============================================
+  // NOUVELLES MÉTHODES
+  // ============================================
+
+  /**
+   * Incrémenter les vues d'un article
+   * @param id - The ID of the article
+   * @returns The updated view count
+   */
+  async incrementViews(id: string): Promise<number> {
+    try {
+      const article = await this.articleModel.findByIdAndUpdate(
+        id,
+        { $inc: { views: 1 } },
+        { new: true }
+      ).exec();
+
+      if (!article) {
+        throw new HttpException(`Article with id ${id} not found`, HttpStatus.NOT_FOUND);
+      }
+
+      return article.views;
+    } catch (error) {
+      throw new HttpException(`Failed to increment views for article ${id}`, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  /**
+   * Toggle like d'un article (pour l'instant incrémente toujours)
+   * TODO: Implémenter un système de likes par utilisateur plus tard
+   * @param id - The ID of the article
+   * @returns The updated like count
+   */
+  async toggleLike(id: string): Promise<number> {
+    try {
+      const article = await this.articleModel.findByIdAndUpdate(
+        id,
+        { $inc: { likes: 1 } },
+        { new: true }
+      ).exec();
+
+      if (!article) {
+        throw new HttpException(`Article with id ${id} not found`, HttpStatus.NOT_FOUND);
+      }
+
+      return article.likes;
+    } catch (error) {
+      throw new HttpException(`Failed to toggle like for article ${id}`, HttpStatus.BAD_REQUEST);
     }
   }
 }
