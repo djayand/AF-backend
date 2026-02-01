@@ -36,6 +36,9 @@ $ npm run test:cov
 
 ## Versions
 
+**v0.0.4**
+- Ajout de fonctions stats sur les articles
+
 **v0.0.3**
 - Ajout du CRUD sur l'effectif
 
