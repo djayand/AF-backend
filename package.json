@@ -1,6 +1,6 @@
 {
   "name": "atletifrancia-backend",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Partie backend du site web d'AtletiFrancia",
   "author": "Djay",
   "private": true,
@@ -24,7 +24,7 @@
     "@nestjs/swagger": "^11.2.5",
     "bcryptjs": "^3.0.3",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.1.4",
+    "mongoose": "^9.1.5",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
