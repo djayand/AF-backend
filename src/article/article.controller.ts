@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Put, Param, Body, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Put, Param, Body, Query, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { ApiBody } from '@nestjs/swagger';
 import { ArticleService } from './article.service';
 import { Article } from '../interfaces/article.interface';
@@ -9,6 +9,10 @@ export class ArticleController {
 
   constructor(private readonly articleService: ArticleService) { }
 
+  /**
+   * Creates a new article.
+   * POST /articles
+   */
   @Post()
   @ApiBody({ type: Article })
   async createArticle(@Body() article: Article): Promise<Article> {
@@ -23,6 +27,93 @@ export class ArticleController {
     }
   }
 
+  /**
+   * Retrieves the featured article (for homepage hero section).
+   * GET /articles/featured
+   */
+  @Get('featured')
+  async findFeatured(): Promise<Article> {
+    try {
+      this.logger.log('GET /articles/featured');
+      const article = await this.articleService.findFeatured();
+
+      if (!article) {
+        this.logger.warn('No featured article found');
+        throw new HttpException('No featured article found', HttpStatus.NOT_FOUND);
+      }
+
+      return article;
+    } catch (error) {
+      this.logger.error('Error fetching featured article:', error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Retrieves recent articles.
+   * GET /articles/recent?limit=6
+   */
+  @Get('recent')
+  async findRecent(@Query('limit') limit?: string): Promise<Article[]> {
+    try {
+      const parsedLimit = limit ? parseInt(limit, 10) : 10;
+      this.logger.log(`GET /articles/recent?limit=${parsedLimit}`);
+
+      return await this.articleService.findRecent(parsedLimit);
+    } catch (error) {
+      this.logger.error('Error fetching recent articles:', error.stack);
+      throw new HttpException('Failed to fetch recent articles', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  /**
+   * Retrieves articles by keywords.
+   * GET /articles/by-keywords?keywords=Mercato,Rumeurs&limit=8
+   */
+  @Get('by-keywords')
+  async findByKeywords(
+    @Query('keywords') keywordsParam?: string,
+    @Query('limit') limitParam?: string
+  ): Promise<{ count: number; keywords: string[]; articles: Article[] }> {
+    try {
+      if (!keywordsParam) {
+        this.logger.warn('GET /articles/by-keywords called without keywords parameter');
+        throw new HttpException(
+          'Parameter "keywords" is required. Example: /articles/by-keywords?keywords=Mercato,Rumeurs',
+          HttpStatus.BAD_REQUEST
+        );
+      }
+
+      const keywords = keywordsParam
+        .split(',')
+        .map(k => k.trim())
+        .filter(k => k.length > 0);
+
+      if (keywords.length === 0) {
+        throw new HttpException('At least one valid keyword is required', HttpStatus.BAD_REQUEST);
+      }
+
+      const limit = limitParam ? parseInt(limitParam, 10) : 10;
+
+      this.logger.log(`GET /articles/by-keywords?keywords=${keywordsParam}&limit=${limit}`);
+
+      const articles = await this.articleService.findByKeywords(keywords, limit);
+
+      return {
+        count: articles.length,
+        keywords: keywords,
+        articles: articles
+      };
+    } catch (error) {
+      this.logger.error('Error fetching articles by keywords:', error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Retrieves a single article by ID.
+   * GET /articles/:id
+   */
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<Article> {
     try {
@@ -34,6 +125,10 @@ export class ArticleController {
     }
   }
 
+  /**
+   * Retrieves all articles.
+   * GET /articles
+   */
   @Get()
   async findAll(): Promise<Article[]> {
     try {
@@ -45,6 +140,10 @@ export class ArticleController {
     }
   }
 
+  /**
+   * Updates an article by ID.
+   * PATCH /articles/:id
+   */
   @Patch(':id')
   @ApiBody({ type: Article })
   async update(@Param('id') id: string, @Body() updateData: Partial<Article>): Promise<Article> {
@@ -57,6 +156,10 @@ export class ArticleController {
     }
   }
 
+  /**
+   * Deletes an article by ID.
+   * DELETE /articles/:id
+   */
   @Delete(':id')
   async delete(@Param('id') id: string): Promise<Article> {
     try {
@@ -68,12 +171,8 @@ export class ArticleController {
     }
   }
 
-  // ============================================
-  // NOUVELLES ROUTES
-  // ============================================
-
   /**
-   * Incrémenter les vues d'un article
+   * Increments the view count of an article.
    * PUT /articles/:id/views
    */
   @Put(':id/views')
@@ -89,7 +188,7 @@ export class ArticleController {
   }
 
   /**
-   * Toggle like d'un article
+   * Toggles the like status of an article.
    * PUT /articles/:id/like
    */
   @Put(':id/like')

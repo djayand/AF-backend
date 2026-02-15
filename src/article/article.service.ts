@@ -85,14 +85,10 @@ export class ArticleService {
     }
   }
 
-  // ============================================
-  // NOUVELLES MÉTHODES
-  // ============================================
-
   /**
-   * Incrémenter les vues d'un article
-   * @param id - The ID of the article
-   * @returns The updated view count
+   * Increments the view count of an article.
+   * @param id - The ID of the article.
+   * @returns The updated view count.
    */
   async incrementViews(id: string): Promise<number> {
     try {
@@ -113,10 +109,10 @@ export class ArticleService {
   }
 
   /**
-   * Toggle like d'un article (pour l'instant incrémente toujours)
-   * TODO: Implémenter un système de likes par utilisateur plus tard
-   * @param id - The ID of the article
-   * @returns The updated like count
+   * Toggles the like count of an article.
+   * Currently always increments. TODO: Implement user-specific likes.
+   * @param id - The ID of the article.
+   * @returns The updated like count.
    */
   async toggleLike(id: string): Promise<number> {
     try {
@@ -133,6 +129,69 @@ export class ArticleService {
       return article.likes;
     } catch (error) {
       throw new HttpException(`Failed to toggle like for article ${id}`, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  /**
+   * Retrieves the featured article (displayed as hero on homepage).
+   * @returns The most recent featured article, or null if none found.
+   */
+  async findFeatured(): Promise<Article | null> {
+    try {
+      const featuredArticle = await this.articleModel
+        .findOne({ isFeatured: true })
+        .sort({ createdAt: -1 })
+        .limit(1)
+        .exec();
+
+      return featuredArticle;
+    } catch (error) {
+      throw new HttpException('Failed to fetch featured article', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  /**
+   * Retrieves the most recent articles.
+   * @param limit - Number of articles to retrieve (min: 1, max: 50, default: 10).
+   * @returns A list of recent articles, sorted by creation date (newest first).
+   */
+  async findRecent(limit: number = 10): Promise<Article[]> {
+    try {
+      const validLimit = Math.min(Math.max(limit, 1), 50);
+
+      return await this.articleModel
+        .find()
+        .sort({ createdAt: -1 })
+        .limit(validLimit)
+        .select('-comments')
+        .exec();
+    } catch (error) {
+      throw new HttpException('Failed to fetch recent articles', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  /**
+   * Retrieves articles containing ALL specified keywords.
+   * @param keywords - Array of keywords that must all be present in the article.
+   * @param limit - Number of articles to retrieve (min: 1, max: 50, default: 10).
+   * @returns A list of articles matching all keywords, sorted by creation date (newest first).
+   */
+  async findByKeywords(keywords: string[], limit: number = 10): Promise<Article[]> {
+    try {
+      if (!keywords || keywords.length === 0) {
+        throw new HttpException('At least one keyword is required', HttpStatus.BAD_REQUEST);
+      }
+
+      const validLimit = Math.min(Math.max(limit, 1), 50);
+
+      return await this.articleModel
+        .find({ keywords: { $all: keywords } })
+        .sort({ createdAt: -1 })
+        .limit(validLimit)
+        .select('-comments')
+        .exec();
+    } catch (error) {
+      throw new HttpException('Failed to fetch articles by keywords', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }
