@@ -36,6 +36,9 @@ $ npm run test:cov
 
 ## Versions
 
+**v0.0.5**
+- Ajout de S3 en backend
+
 **v0.0.4**
 - Ajout de fonctions stats sur les articles
 
